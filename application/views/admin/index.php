@@ -18,6 +18,7 @@
     <!-- /.content-header -->
     <div class="container">
         <div class="flash-data" data-flashdata="<?= $this->session->flashdata('message'); ?>" data-data="Petugas"></div>
+        <?php $this->session->unset_userdata('message'); ?>
         <div class="row">
             <div class="col-12">
                 <div class="card">

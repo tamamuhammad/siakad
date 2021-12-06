@@ -12,7 +12,7 @@ class Profile extends CI_Controller
     public function index()
     {
         $email = $this->session->userdata('email');
-        $data['user'] = $this->db->get_where('admin', ['email' => $email])->row_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $email])->row_array();
         $roleId = $data['user']['role'];
         $data['role'] = $this->db->get_where('user_role', ['id' => $roleId])->row_array();
         $data['title'] = 'My Profile';
@@ -25,9 +25,11 @@ class Profile extends CI_Controller
 
     public function edit()
     {
-        $data['user'] = $this->db->get_where('admin', ['email' => $this->session->userdata('email')])->row_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
         $data['title'] = 'Edit Profile';
-        $this->form_validation->set_rules('name', 'Full Name', 'required|trim');
+        $this->form_validation->set_rules('name', 'Nama Lengkap', 'required|trim');
+        $this->form_validation->set_rules('alamat', 'Alamat', 'required');
+        $this->form_validation->set_rules('telp', 'No Telepon', 'required');
 
         if ($this->form_validation->run() == FALSE) {
             $this->load->view('templates/header', $data);
@@ -38,7 +40,6 @@ class Profile extends CI_Controller
         } else {
             $name = $this->input->post('name');
             $email = $this->input->post('email');
-
             $img = $_FILES['gambar']['name'];
 
             if ($img) {
@@ -50,26 +51,35 @@ class Profile extends CI_Controller
 
                 if ($this->upload->do_upload('gambar')) {
                     $data = $this->upload->data();
-                    $config['image_library'] = 'gd2';
-                    $config['width'] = '480';
-                    $config['height'] = '480';
-                    $config['x_axis'] = '480';
-                    $config['y_axis'] = '480';
-                    $this->load->library('image_lib', $config);
-                    $this->image_lib->crop();
-                    $oldgambar = $data['user']['gambar'];
+                    $oldgambar = $data['admin']['gambar'];
                     if ($oldgambar != 'default.jpg') {
                         unlink(FCPATH . 'assets/img/' . $oldgambar);
                     }
-                    $newgambar = $this->upload->data('file_name');
+                    $config['image_library'] = 'gd2';
+                    $config['source_image'] = './assets/img/' . $data['file_name'];
+                    $config['maintain_ratio'] = FALSE;
+                    $config['width'] = '480';
+                    $config['height'] = '480';
+                    // $config['x_axis'] = '0';
+                    // $config['y_axis'] = '0';
+                    $config['new_image'] = './assets/img/' . $data['file_name'];
+                    $this->load->library('image_lib', $config);
+                    $this->image_lib->resize();
+                    $newgambar = $data['file_name'];
                     $this->db->set('gambar', $newgambar);
                 } else {
                     echo $this->upload->display_errors();
                 }
             }
-            $this->db->set('nama', $name);
+            $data = [
+                'nama' => $this->input->post('name'),
+                'alamat' => $this->input->post('alamat'),
+                'telp' => $this->input->post('telp'),
+            ];
+
+            $this->db->set($data);
             $this->db->where('email', $email);
-            $this->db->update('admin');
+            $this->db->update('user');
             $this->session->set_flashdata('message', 'Diubah');
             redirect('profile/changepassword');
         }
@@ -77,7 +87,7 @@ class Profile extends CI_Controller
 
     public function changepassword()
     {
-        $data['user'] = $this->db->get_where('admin', ['email' => $this->session->userdata('email')])->row_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
         $data['title'] = 'Change Password';
         $this->form_validation->set_rules('currentPassword', 'Current Password', 'required|trim');
         $this->form_validation->set_rules('newPassword', 'New Password', 'required|trim|min_length[6]|matches[repeatPassword]');
@@ -99,7 +109,7 @@ class Profile extends CI_Controller
                     $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
                     $this->db->set('password', $newPassword);
                     $this->db->where('email', $data['user']['email']);
-                    $this->db->update('admin');
+                    $this->db->update('user');
                     $this->session->set_flashdata('message', 'Diubah');
                     redirect('profile/changepassword');
                 }

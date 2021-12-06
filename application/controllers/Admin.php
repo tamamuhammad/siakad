@@ -12,8 +12,8 @@ class Admin extends CI_Controller
     public function index()
     {
         $email = $this->session->userdata('email');
-        $data['user'] = $this->db->get_where('admin', ['email' => $email])->row_array();
-        $data['petugas'] = $this->db->get('admin')->result_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $email])->row_array();
+        $data['petugas'] = $this->db->get('user')->result_array();
         $data['title'] = 'Data Petugas';
         $this->load->view('templates/header', $data);
         $this->load->view('templates/topbar', $data);
@@ -25,11 +25,15 @@ class Admin extends CI_Controller
     public function signup()
     {
         $email = $this->session->userdata('email');
-        $data['user'] = $this->db->get_where('admin', ['email' => $email])->row_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $email])->row_array();
+        $data['role'] = $this->db->get('user_role')->result_array();
         $data['title'] = 'Register Petugas';
 
         $this->form_validation->set_rules('name', 'Nama', 'required|trim');
-        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[admin.email]');
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[user.email]');
+        $this->form_validation->set_rules('telp', 'No Telepon', 'required|trim');
+        $this->form_validation->set_rules('alamat', 'Alamat', 'required|trim');
+        $this->form_validation->set_rules('role', 'Role', 'required');
         $this->form_validation->set_rules('password1', 'Password', 'required|trim|matches[password2]|min_length[6]');
         $this->form_validation->set_rules('password2', 'Repeat Password', 'required|trim|matches[password1]');
 
@@ -50,12 +54,14 @@ class Admin extends CI_Controller
         $data = [
             'nama' => htmlspecialchars($this->input->post('name', true)),
             'email' => htmlspecialchars($email),
+            'alamat' => htmlspecialchars($this->input->post('alamat', true)),
+            'telp' => htmlspecialchars($this->input->post('telp', true)),
             'password' => password_hash($this->input->post('password1'), PASSWORD_DEFAULT),
             'gambar' => 'default.jpg',
-            'role' => 2,
+            'role' => htmlspecialchars($this->input->post('role', true)),
             'dibuat' => time()
         ];
-        $this->db->insert('admin', $data);
+        $this->db->insert('user', $data);
         $this->session->set_flashdata('message', 'Ditambahkan');
         redirect('admin');
     }
@@ -63,8 +69,8 @@ class Admin extends CI_Controller
     public function detail($id)
     {
         $email = $this->session->userdata('email');
-        $data['user'] = $this->db->get_where('admin', ['email' => $email])->row_array();
-        $data['petugas'] = $this->db->get_where('admin', ['id' => $id])->row_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $email])->row_array();
+        $data['petugas'] = $this->db->get_where('user', ['id' => $id])->row_array();
         $role = $data['petugas']['role'];
         $data['role'] = $this->db->get_where('user_role', ['id' => $role])->row_array();
         $data['title'] = 'Detail ' . $data['petugas']['nama'];
@@ -78,17 +84,19 @@ class Admin extends CI_Controller
     public function hapus($id)
     {
         $this->db->where('id', $id);
-        $this->db->delete('admin');
+        $this->db->delete('user');
         $this->session->set_flashdata('message', 'Dihapus');
         redirect('admin');
     }
 
     public function edit($id)
     {
-        $data['user'] = $this->db->get_where('admin', ['email' => $this->session->userdata('email')])->row_array();
-        $data['admin'] = $this->db->get_where('admin', ['id' => $id])->row_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+        $data['admin'] = $this->db->get_where('user', ['id' => $id])->row_array();
         $data['title'] = 'Edit ' . $data['admin']['nama'];
-        $this->form_validation->set_rules('name', 'Full Name', 'required|trim');
+        $this->form_validation->set_rules('name', 'Nama Lengkap', 'required|trim');
+        $this->form_validation->set_rules('alamat', 'Alamat', 'required');
+        $this->form_validation->set_rules('telp', 'No Telepon', 'required');
 
         if ($this->form_validation->run() == FALSE) {
             $this->load->view('templates/header', $data);
@@ -97,9 +105,6 @@ class Admin extends CI_Controller
             $this->load->view('admin/edit', $data);
             $this->load->view('templates/footer');
         } else {
-            $name = $this->input->post('name');
-            $email = $this->input->post('email');
-
             $img = $_FILES['gambar']['name'];
 
             if ($img) {
@@ -131,9 +136,15 @@ class Admin extends CI_Controller
                     echo $this->upload->display_errors();
                 }
             }
-            $this->db->set('nama', $name);
+            $data = [
+                'nama' => $this->input->post('name'),
+                'alamat' => $this->input->post('alamat'),
+                'telp' => $this->input->post('telp'),
+            ];
+
+            $this->db->set($data);
             $this->db->where('id', $id);
-            $this->db->update('admin');
+            $this->db->update('user');
             $this->session->set_flashdata('message', 'Diubah');
             redirect('admin');
         }
@@ -141,7 +152,7 @@ class Admin extends CI_Controller
 
     public function role()
     {
-        $data['user'] = $this->db->get_where('admin', ['email' => $this->session->userdata('email')])->row_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
         $data['title'] = 'Role Management';
         $data['role'] = $this->db->get('user_role')->result_array();
         $this->load->view('templates/header', $data);
@@ -187,7 +198,7 @@ class Admin extends CI_Controller
 
     public function roleAccess($role_id)
     {
-        $data['user'] = $this->db->get_where('admin', ['email' => $this->session->userdata('email')])->row_array();
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
         $data['role'] = $this->db->get_where('user_role', ['id' => $role_id])->row_array();
         $data['title'] = $data['role']['role'] . ' Access';
         $data['menu'] = $this->db->get('user_menu')->result_array();

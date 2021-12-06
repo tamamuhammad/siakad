@@ -30,3 +30,14 @@ function check_access($role_id, $menu_id)
         return 'checked';
     }
 }
+
+function checkAccess($role, $dokumen)
+{
+    $ci = get_instance();
+
+    $result = $ci->db->get_where('doc_access', ['user' => $role, 'dokumen' => $dokumen])->num_rows();
+
+    if ($result > 0) {
+        return 'checked';
+    }
+}

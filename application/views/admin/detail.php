@@ -32,23 +32,31 @@
             </div>
             <div class="col-md-9">
                 <div class="card">
+                    <div class="card-header">
+                        <strong>Detail Petugas</strong>
+                    </div>
                     <div class="card-body">
-                        <div class="tab-content">
-                            <div class="active tab-pane">
-                                <!-- Post -->
-                                <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
+                        <!-- Post -->
+                        <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
+                        <p class="text-muted">
+                            <?= $petugas['email'] ?>
+                        </p>
+                        <hr>
+                        <strong><i class="fas fa-envelope mr-1"></i> No Telepon</strong>
+                        <p class="text-muted">
+                            <?= $petugas['telp'] ?>
+                        </p>
+                        <hr>
+                        <strong><i class="fas fa-envelope mr-1"></i> Alamat</strong>
+                        <p class="text-muted">
+                            <?= $petugas['alamat'] ?>
+                        </p>
+                        <hr>
+                        <strong><i class="fas fa-envelope mr-1"></i> Tanggal Dibuat</strong>
 
-                                <p class="text-muted">
-                                    <?= $petugas['email'] ?>
-                                </p>
-                                <hr>
-                                <strong><i class="fas fa-envelope mr-1"></i> Tanggal Dibuat</strong>
-
-                                <p class="text-muted">
-                                    <?= date('d M Y', $petugas['dibuat']) ?>
-                                </p>
-                            </div>
-                        </div>
+                        <p class="text-muted">
+                            <?= date('d M Y', $petugas['dibuat']) ?>
+                        </p>
                         <!-- /.tab-content -->
                     </div>
                 </div>

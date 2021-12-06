@@ -4,11 +4,11 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6">
+                <div class="col-md-6">
                     <h1 class="m-0 text-dark">Edit Profile</h1>
                 </div><!-- /.col -->
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
+                <div class="col-md-6">
+                    <ol class="breadcrumb float-md-right">
                         <li class="breadcrumb-item"><a href="<?= base_url('profile') ?>">Profile</a></li>
                         <li class="breadcrumb-item active"><a href="<?= base_url('profile/edit') ?>">Edit Profile</a></li>
                     </ol>
@@ -19,8 +19,9 @@
 
     <!-- Main content -->
     <section class="content">
-        <div class="col-sm-8">
+        <div class="col-md-8">
             <div class="flash-data" data-flashdata="<?= $this->session->flashdata('message'); ?>" data-data="Profile"></div>
+            <?php $this->session->unset_userdata('message'); ?>
             <?= form_open_multipart('profile/edit'); ?>
             <div class="form-group row">
                 <label for="email" class="col-sm-2 col-form-label">Email</label>
@@ -32,6 +33,18 @@
                 <label for="name" class="col-sm-2 col-form-label">Nama</label>
                 <div class="col-sm-10">
                     <input type="text" class="form-control" id="name" name="name" value="<?= $user['nama']; ?>">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="telp" class="col-sm-2 col-form-label">No Telepon</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="telp" name="telp" value="<?= $user['telp']; ?>">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="alamat" class="col-sm-2 col-form-label">Alamat</label>
+                <div class="col-sm-10">
+                    <textarea name="alamat" id="alamat" cols="30" rows="5" class="form-control"><?= $user['alamat'] ?></textarea>
                 </div>
             </div>
             <div class="form-group row">
